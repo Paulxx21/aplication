@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cancionero de Karaoke</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            margin: 0;
+            padding: 20px;
+            color: #fff;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .artist {
+            background-color: #282828;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .artist h3 {
+            margin-top: 0;
+            cursor: pointer;
+            color: #1DB954;
+        }
+        .songs {
+            list-style: none;
+            padding: 0;
+            flex-grow: 1;
+        }
+        .songs li {
+            margin-bottom: 10px;
+        }
+        .artist img {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            margin-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Cancionero de Karaoke</h2>
+    <form id="songForm">
+        <!-- Aquí se cargarán los artistas y canciones desde la URL -->
+    </form>
+
+    <script>
+        function solicitarNombre(artista, cancion) {
+            var nombre = prompt("Por favor, ingresa tu nombre:");
+            if (nombre != null && nombre != "") {
+                enviarCorreo(nombre, artista, cancion);
+            }
+        }
+
+        function enviarCorreo(nombre, artista, cancion) {
+            var cuerpoCorreo = "Nombre: " + nombre + "\nArtista: " + artista + "\nCanción votada: " + cancion;
+            window.location.href = "mailto:emacantobarkaraoke@gmail.com?subject=Votos de Karaoke&body=" + encodeURIComponent(cuerpoCorreo);
+        }
+
+        function loadArtistsFromURL() {
+            var params = new URLSearchParams(window.location.search);
+            var artists = JSON.parse(decodeURIComponent(params.get('artists')));
+
+            artists.forEach(function(artist, index) {
+                var artistDiv = document.createElement('div');
+                artistDiv.className = 'artist';
+                artistDiv.id = 'artist' + index;
+
+                artistDiv.innerHTML = `
+                    <div>
+                        <h3 onclick="toggleArtistOptions('artist${index}')">${artist.name} &#9660;</h3>
+                        <ul class="songs">${artist.songs.map((song, songIndex) => `<li><input type="radio" id="artist${index}song${songIndex + 1}" name="song" value="${song}" onclick="solicitarNombre('${artist.name}', '${song}')"><label for="artist${index}song${songIndex + 1}"> ${song}</label></li>`).join('')}</ul>
+                    </div>
+                    <img src="${artist.image}" alt="${artist.name}">
+                `;
+
+                document.getElementById('songForm').appendChild(artistDiv);
+            });
+        }
+
+        function toggleArtistOptions(artistId) {
+            var artistDiv = document.getElementById(artistId);
+            var songsUl = artistDiv.querySelector('.songs');
+            songsUl.style.display = songsUl.style.display === 'none' ? 'block' : 'none';
+        }
+
+        window.onload = function() {
+            loadArtistsFromURL();
+        };
+    </script>
+</body>
+</html>
